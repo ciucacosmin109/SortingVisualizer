@@ -26,7 +26,7 @@ export class NavMenu extends Component {
         return (<>
             <NavItem>
                 <NavLink tag={Link} 
-                    isActive={(/*match*/_, location) => ["/", "/index"].includes(location.pathname)} 
+                    isActive={(/*match*/_, location) => ["/", "/index", "/index.html"].includes(location.pathname)} 
                     activeClassName="active-nav-link" 
                     className="nav-link text-dark" to="/">
                         <p style={{display: "inline"}}>Home</p>

@@ -15,6 +15,7 @@ export default class App extends Component {
             <Layout>
                 <Route exact path='/' component={Home} /> 
                 <Route exact path='/index' component={Home} /> 
+                <Route exact path='/index.html' component={Home} /> 
                 <Route exact path='/about' component={About} /> 
             </Layout>
         );
