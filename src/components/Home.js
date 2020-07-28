@@ -6,7 +6,8 @@ import { InsertionSort } from '../algorithms/InsertionSort.js';
 import { SelectionSort } from '../algorithms/SelectionSort.js';
 import { MergeSortRecursive } from '../algorithms/MergeSortRecursive.js';
 import { MergeSortIterative } from '../algorithms/MergeSortIterative.js';
-import { CocktailSort } from '../algorithms/CocktailSort.js'; 
+import { CocktailSort } from '../algorithms/CocktailSort.js';
+import { QuickSort } from '../algorithms/QuickSort.js';
 
 import './Home.css';
  
@@ -30,7 +31,7 @@ export class Home extends Component {
                 width: window.innerWidth,
                 height: window.innerHeight
             },*/
-            algorithmId: 6, // Used by the algo combo-box
+            algorithmId: 7, // Used by the algo combo-box
             array: [], // The current array
 
             playing: false, // Used by the Plaay/Pause button
@@ -176,7 +177,10 @@ export class Home extends Component {
                 break;
             case 6:
                 sortResult = CocktailSort.sort(this.state.array, modifyTheOriginal);
-                break; 
+                break;
+            case 7:
+                sortResult = QuickSort.sort(this.state.array, modifyTheOriginal);
+                break;
             default:
                 break;
         }
@@ -254,7 +258,8 @@ export class Home extends Component {
                                 <option value={3}>Selection sort</option>
                                 <option value={4}>Merge sort (recursive)</option>
                                 <option value={5}>Merge sort (iterative)</option>
-                                <option value={6}>Cocktail sort</option> 
+                                <option value={6}>Cocktail sort</option>
+                                <option value={7}>Quick sort</option>
                             </select>
 
                         </div>
