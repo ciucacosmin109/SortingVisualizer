@@ -1,0 +1,54 @@
+﻿
+.card {
+    margin: 0;
+    margin-bottom: 10px;
+}
+.card .card-header, .card .card-body, .card .card-footer {
+    padding: 10px;
+}
+.card .card-header * { 
+    display:inline;
+}
+.card .card-header label {
+    margin-right: 10px;
+}
+.card .card-header .btn,
+.card .card-body .btn,
+.card .card-footer .btn {
+    margin: 0;
+    margin-right: 10px;
+} 
+@media only screen and (min-width: 425px) {
+    .speed-range-input {
+        float: right;
+    }
+}
+@media only screen and (max-width: 424px) {
+    .speed-range-input {
+        margin-top: 10px;
+    }
+}
+.speed-range-input label {
+    margin-top: 0.1em;
+    margin-right: 8px;
+} 
+.combo-box {
+    border: 1px solid #ced4da;
+    border-radius: .25rem; 
+} 
+
+
+
+
+.render-zone {
+    display: flex;
+    flex-flow: row;
+}
+.render-zone div { 
+    flex: 1; 
+}
+.vertical-bar{
+    margin:0;
+    background-color:darkgray; 
+} 
+
