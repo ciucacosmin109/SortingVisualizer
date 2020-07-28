@@ -41,6 +41,7 @@ export class QuickSort {
                 [arr[left], arr[right]] = [arr[right], arr[left]];
 
                 // Animation
+                result.addCompareAnimation(left, right);
                 result.addSwapAnimation(left, right);
 
                 left++;

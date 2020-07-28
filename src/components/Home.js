@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 
+import './Home.css';
+ 
 import { SortResult } from '../algorithms/SortResult.js'; 
 import { BubbleSort } from '../algorithms/BubbleSort.js';
 import { InsertionSort } from '../algorithms/InsertionSort.js';
@@ -9,16 +11,16 @@ import { MergeSortIterative } from '../algorithms/MergeSortIterative.js';
 import { CocktailSort } from '../algorithms/CocktailSort.js';
 import { QuickSort } from '../algorithms/QuickSort.js';
 
-import './Home.css';
+
+const INITIAL_ARRAY_SIZE = 100;
+const MAX_ARRAY_ELEMENT = 300;
+const ALLOWED_DELAYS = [1000, 300, 100, 40, 10, 1];
+
+const INITIAL_COLOR = "darkgray";
+const SORTED_COLOR = "green";
+const COMPARE_COLOR = "red";
+const REPLACE_COLOR = "violet";
  
-const arraySize = 100;
-const maxArrayElement = 300;
-
-const initialColor = "darkgray";
-const sortedColor = "green";
-const checkColor = "red";
-const replaceColor = "violet";
-
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -43,13 +45,17 @@ export class Home extends Component {
         this.animState = {
             loop: null, // The timer for the steps: used by the speedslider when changing the speed
             loopFunction: null, // The function that will be called at each step by the 'loop'
+
             currentStep: 0, // To be able to go to the next step
             numberOfSteps: 0, // The totla number of steps
 
             toUncolor: [] // The elements that need to be uncolored
         };
          
-    }
+        this.config = {
+            arraySize : INITIAL_ARRAY_SIZE
+        };
+    } 
     componentDidMount() { this.generateNewArray(); } // Generate a new array everytime the user opens up the sorting page
     componentWillUnmount() { this.stopSortAnimation(); } // Stop the animation if the user goes to another page
 
@@ -61,12 +67,12 @@ export class Home extends Component {
         }
 
         let arr = [];
-        for (let i = 0; i < arraySize; i++) {
-            arr.push(randomNumber(1, maxArrayElement));
+        for (let i = 0; i < this.config.arraySize; i++) {
+            arr.push(randomNumber(1, MAX_ARRAY_ELEMENT));
         }
         this.setState({ array: arr }); 
 
-        this.paintArray(initialColor);
+        this.paintArray(INITIAL_COLOR);
     }
     
     paintArray(color) {
@@ -90,7 +96,7 @@ export class Home extends Component {
         this.animState.currentStep = 0;
         this.animState.numberOfSteps = animations.length;
         this.animState.toUncolor = [];
-        this.paintArray(initialColor)
+        this.paintArray(INITIAL_COLOR)
 
         this.animState.loopFunction = () => {
             let i = this.animState.currentStep;
@@ -98,7 +104,7 @@ export class Home extends Component {
             // End the loop
             if (i >= this.animState.numberOfSteps - 1) {
                 clearInterval(this.animState.loop);
-                this.paintArray(sortedColor);
+                this.paintArray(SORTED_COLOR);
 
                 this.animState.currentStep = 0;
                 this.setState({ playing: false });
@@ -108,16 +114,16 @@ export class Home extends Component {
             // Play the animation
             if (SortResult.isEmptyAnimation(animations[i])) {
                 while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(initialColor, this.animState.toUncolor.pop());
+                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
             } else if (SortResult.isCompareAnimation(animations[i])) {
                 //this.paintArray("darkgray");
                 while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(initialColor, this.animState.toUncolor.pop());
+                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
 
-                this.paintArrayIndex(checkColor, animations[i].i);
-                this.paintArrayIndex(checkColor, animations[i].j);
+                this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
+                this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
 
                 this.animState.toUncolor.push(animations[i].i, animations[i].j);
 
@@ -136,11 +142,11 @@ export class Home extends Component {
             } else if (SortResult.isReplaceAnimation(animations[i])) {
                 // Uncolor the last colored elements
                 while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(initialColor, this.animState.toUncolor.pop());
+                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
 
                 for (let k = animations[i].i; k <= animations[i].j; k++) {
-                    this.paintArrayIndex(replaceColor, k);
+                    this.paintArrayIndex(REPLACE_COLOR, k);
                     this.animState.toUncolor.push(k); // These will be uncolored at the next step
 
                     // eslint-disable-next-line
@@ -198,7 +204,7 @@ export class Home extends Component {
 
         for (let i = 0; i < this.state.array.length; i++) {
             let elem = document.getElementById("vertical-bar-" + i);
-            elem.style.backgroundColor = sortedColor;
+            elem.style.backgroundColor = SORTED_COLOR;
         }
     }
 
@@ -228,7 +234,7 @@ export class Home extends Component {
     stopSortAnimation() {
         clearInterval(this.animState.loop);
         this.animState.currentStep = 0; 
-        this.paintArray(initialColor);
+        this.paintArray(INITIAL_COLOR);
 
         this.setState({ playing: false });
     }
@@ -242,7 +248,13 @@ export class Home extends Component {
     onSpeedChange = (event) => {
         this.pauseSortAnimation();
         let v = parseInt(event.target.value);
-        this.setState({ delay: 100 - v + 1 }/*, () => this.startSortAnimation()*/);
+        this.setState({ delay: ALLOWED_DELAYS[v - 1] }/*, () => this.startSortAnimation()*/);
+    }
+    onArraySizeChange = (event) => {
+        //this.pauseSortAnimation();
+        let v = parseInt(event.target.value);
+        this.config.arraySize = v;
+        this.setState({ update: true });
     }
     render() {
         return (
@@ -250,7 +262,7 @@ export class Home extends Component {
                 <div className="card">
                     <div className="card-header">
                         <div className="form-inline">
-                            <label htmlFor="selectAlgoDropDown">Algorithm</label>
+                            <label htmlFor="selectAlgoDropDown"><h6>Algorithm</h6></label>
                             <select className="btn btn-sm combo-box" id="selectAlgoDropDown"
                                 onChange={this.onAlgorithmChange} value={this.state.algorithmId}>
                                 <option value={1}>Bubble sort</option>
@@ -270,6 +282,13 @@ export class Home extends Component {
                             onClick={() => this.generateNewArray()}>New array</button>
                         <button className="btn btn-success btn-sm"
                             onClick={() => this.instantSort()}>Instant sort</button>
+                        
+                        <div className="range-input form-inline">
+                            <label htmlFor="sizeRangeSlider">Array's size: {this.config.arraySize}</label>
+                            <input type="range" className="slider" id="sizeRangeSlider"
+                                min="10" max="500" value={this.config.arraySize} 
+                                onChange={this.onArraySizeChange} />
+                        </div> 
                     </div>
                      
                     <div className="card-body"> 
@@ -295,10 +314,12 @@ export class Home extends Component {
                             {" > Next"}
                         </button>
 
-                        <div className="speed-range-input form-inline">
-                            <label htmlFor="speedRangeSlider">Speed</label>
-                            <input type="range" min="1" max="100" className="slider" id="speedRangeSlider"
-                                value={100 - this.state.delay + 1} onChange={this.onSpeedChange} />
+                        <div className="range-input form-inline">
+                            <label htmlFor="speedRangeSlider">Speed: {ALLOWED_DELAYS.indexOf(this.state.delay) + 1}x</label>
+                            <input type="range" className="slider" id="speedRangeSlider"
+                                min="1" max={ALLOWED_DELAYS.length}
+                                value={ALLOWED_DELAYS.indexOf(this.state.delay) + 1} 
+                                onChange={this.onSpeedChange} />
                         </div> 
                     </div>
                 </div>

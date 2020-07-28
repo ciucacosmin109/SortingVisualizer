@@ -6,38 +6,41 @@
 .card .card-header, .card .card-body, .card .card-footer {
     padding: 10px;
 }
-.card .card-header * { 
+.card .card-header h6 { 
     display:inline;
 }
 .card .card-header label {
+    margin-top: 7px;
     margin-right: 10px;
 }
+.card .card-header .combo-box {
+    border: 1px solid #ced4da;
+    border-radius: .25rem; 
+} 
 .card .card-header .btn,
 .card .card-body .btn,
 .card .card-footer .btn {
     margin: 0;
     margin-right: 10px;
 } 
-@media only screen and (min-width: 425px) {
-    .speed-range-input {
+ 
+
+
+@media only screen and (min-width: 495px) {
+    .range-input {
         float: right;
     }
 }
-@media only screen and (max-width: 424px) {
-    .speed-range-input {
+@media only screen and (max-width: 494px) {
+    .range-input {
         margin-top: 10px;
     }
 }
-.speed-range-input label {
+.range-input label {
     margin-top: 0.1em;
     margin-right: 8px;
-} 
-.combo-box {
-    border: 1px solid #ced4da;
-    border-radius: .25rem; 
-} 
-
-
+}
+ 
 
 
 .render-zone {
@@ -47,7 +50,7 @@
 .render-zone div { 
     flex: 1; 
 }
-.vertical-bar{
+.render-zone .vertical-bar{
     margin:0;
     background-color:darkgray; 
 } 

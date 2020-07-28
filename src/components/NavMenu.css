@@ -18,6 +18,12 @@ html {
 }
 
 
-.active-nav-link * {
-  border-bottom: 1px solid black;
+.nav-link p { 
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+  padding-bottom: 0.3em;
+  margin-bottom: 0.4em; 
+}
+.active-nav-link p {  
+  border-bottom: 1.5px solid rgb(94, 94, 94);
 }
