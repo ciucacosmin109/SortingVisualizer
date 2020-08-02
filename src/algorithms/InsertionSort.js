@@ -22,6 +22,8 @@ export class InsertionSort {
             }
             array[j + 1] = current;
         }
+        
+        result.addReplaceAnimation(0, array.length, array);
         result.sortedArray = array; 
         return result;
     }

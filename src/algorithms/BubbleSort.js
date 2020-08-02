@@ -26,6 +26,7 @@ export class BubbleSort {
                 }
             }
         } 
+        result.addReplaceAnimation(0, array.length, array);
         result.sortedArray = array; 
         return result;
     }

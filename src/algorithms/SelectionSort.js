@@ -24,6 +24,7 @@ export class SelectionSort {
             // Add movement 
             result.addSwapAnimation(minIdx, i);
         } 
+        result.addReplaceAnimation(0, array.length, array);
         result.sortedArray = array;
         return result;
     }

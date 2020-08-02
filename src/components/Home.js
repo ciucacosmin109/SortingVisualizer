@@ -102,7 +102,7 @@ export class Home extends Component {
             let i = this.animState.currentStep;
 
             // End the loop
-            if (i >= this.animState.numberOfSteps - 1) {
+            if (i >= this.animState.numberOfSteps) {
                 clearInterval(this.animState.loop);
                 this.paintArray(SORTED_COLOR);
 
