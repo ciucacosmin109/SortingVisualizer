@@ -10,6 +10,7 @@ import { MergeSortRecursive } from '../algorithms/MergeSortRecursive.js';
 import { MergeSortIterative } from '../algorithms/MergeSortIterative.js';
 import { CocktailSort } from '../algorithms/CocktailSort.js';
 import { QuickSort } from '../algorithms/QuickSort.js';
+import { HeapSort } from '../algorithms/HeapSort';
 
 
 const INITIAL_ARRAY_SIZE = 100;
@@ -113,11 +114,12 @@ export class Home extends Component {
 
             // Play the animation
             if (SortResult.isEmptyAnimation(animations[i])) {
+                // Uncolor the last colored elements
                 while (this.animState.toUncolor.length > 0) {
                     this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
-            } else if (SortResult.isCompareAnimation(animations[i])) {
-                //this.paintArray("darkgray");
+            } else if (SortResult.isCompareAnimation(animations[i])) { 
+                // Uncolor the last colored elements
                 while (this.animState.toUncolor.length > 0) {
                     this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
@@ -125,9 +127,18 @@ export class Home extends Component {
                 this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
                 this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
 
+                // Store indices to uncolor
                 this.animState.toUncolor.push(animations[i].i, animations[i].j);
 
             } else if (SortResult.isSwapAnimation(animations[i])) {
+                // Uncolor the last colored elements
+                while (this.animState.toUncolor.length > 0) {
+                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
+                }
+
+                this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
+                this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
+                
                 let a = animations[i].i;
                 let b = animations[i].j;
 
@@ -139,6 +150,9 @@ export class Home extends Component {
 
                 this.setState({ update: true });
 
+                // Store indices to uncolor
+                this.animState.toUncolor.push(animations[i].i, animations[i].j);
+
             } else if (SortResult.isReplaceAnimation(animations[i])) {
                 // Uncolor the last colored elements
                 while (this.animState.toUncolor.length > 0) {
@@ -147,7 +161,9 @@ export class Home extends Component {
 
                 for (let k = animations[i].i; k <= animations[i].j; k++) {
                     this.paintArrayIndex(REPLACE_COLOR, k);
-                    this.animState.toUncolor.push(k); // These will be uncolored at the next step
+                    
+                    // Store indices to uncolor
+                    this.animState.toUncolor.push(k); 
 
                     // eslint-disable-next-line
                     this.state.array[k] = animations[i].subArrayToReplace[k - animations[i].i];
@@ -186,6 +202,9 @@ export class Home extends Component {
                 break;
             case 7:
                 sortResult = QuickSort.sort(this.state.array, modifyTheOriginal);
+                break;
+            case 8:
+                sortResult = HeapSort.sort(this.state.array, modifyTheOriginal);
                 break;
             default:
                 break;
@@ -272,6 +291,7 @@ export class Home extends Component {
                                 <option value={5}>Merge sort (iterative)</option>
                                 <option value={6}>Cocktail sort</option>
                                 <option value={7}>Quick sort</option>
+                                <option value={8}>Heap sort</option>
                             </select>
 
                         </div>

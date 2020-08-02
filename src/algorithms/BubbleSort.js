@@ -10,7 +10,7 @@ export class BubbleSort {
             sorted = true;
 
             for (let i = 0; i < array.length - k - 1; i++) {
-                // Register the check into the animation
+                // Register the check into the animations
                 result.addCompareAnimation(i, i + 1);
 
                 if (array[i] > array[i+1]) {
@@ -21,12 +21,12 @@ export class BubbleSort {
                     array[i] = array[i + 1];
                     array[i + 1] = temp;
 
-                    // Register the swap into the animation  
+                    // Register the swap into the animations
                     result.addSwapAnimation(i, i + 1); 
                 }
             }
         } 
-        result.addReplaceAnimation(0, array.length, array);
+        result.addReplaceAnimation(0, array.length - 1, array); 
         result.sortedArray = array; 
         return result;
     }

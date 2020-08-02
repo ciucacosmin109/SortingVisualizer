@@ -7,7 +7,7 @@ export class MergeSortIterative {
 
         MergeSortIterative.mergeSortIter(array, result); 
 
-        result.addReplaceAnimation(0, array.length, array);
+        result.addReplaceAnimation(0, array.length - 1, array); 
         result.sortedArray = array;
         return result;
     } 

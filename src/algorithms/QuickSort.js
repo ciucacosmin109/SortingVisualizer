@@ -7,7 +7,7 @@ export class QuickSort {
 
         QuickSort.quickSort(array, 0, array.length - 1, result);
 
-        result.addReplaceAnimation(0, array.length, array);
+        result.addReplaceAnimation(0, array.length - 1, array); 
         result.sortedArray = array;
         return result;
     }
@@ -40,8 +40,7 @@ export class QuickSort {
                 // Swap
                 [arr[left], arr[right]] = [arr[right], arr[left]];
 
-                // Animation
-                result.addCompareAnimation(left, right);
+                // Animation 
                 result.addSwapAnimation(left, right);
 
                 left++;

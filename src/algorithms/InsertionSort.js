@@ -7,15 +7,14 @@ export class InsertionSort {
 
         for (let i = 1; i < array.length; i++) { 
             let current = array[i]; 
-            // Register the check into the animation
+            // Register the check into the animations
             result.addCompareAnimation(i, i);
 
             let j = i - 1;
             while (j >= 0 && current < array[j]) { 
                 array[j + 1] = array[j]; 
                  
-                // Register the move into the animation 
-                result.addCompareAnimation(j, j + 1);
+                // Register the move into the animations  
                 result.addSwapAnimation(j, j + 1);
 
                 j--;
@@ -23,7 +22,7 @@ export class InsertionSort {
             array[j + 1] = current;
         }
         
-        result.addReplaceAnimation(0, array.length, array);
+        result.addReplaceAnimation(0, array.length - 1, array); 
         result.sortedArray = array; 
         return result;
     }
