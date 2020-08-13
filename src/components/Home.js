@@ -11,6 +11,7 @@ import { MergeSortIterative } from '../algorithms/MergeSortIterative.js';
 import { CocktailSort } from '../algorithms/CocktailSort.js';
 import { QuickSort } from '../algorithms/QuickSort.js';
 import { HeapSort } from '../algorithms/HeapSort';
+import { ShellSort } from '../algorithms/ShellSort';
 
 
 const INITIAL_ARRAY_SIZE = 100;
@@ -198,13 +199,16 @@ export class Home extends Component {
                 sortResult = MergeSortIterative.sort(this.state.array, modifyTheOriginal);
                 break;
             case 6:
-                sortResult = CocktailSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 7:
                 sortResult = QuickSort.sort(this.state.array, modifyTheOriginal);
                 break;
-            case 8:
+            case 7:
                 sortResult = HeapSort.sort(this.state.array, modifyTheOriginal);
+                break;
+            case 8:
+                sortResult = ShellSort.sort(this.state.array, modifyTheOriginal);
+                break;
+            case 9:
+                sortResult = CocktailSort.sort(this.state.array, modifyTheOriginal);
                 break;
             default:
                 break;
@@ -289,9 +293,11 @@ export class Home extends Component {
                                 <option value={3}>Selection sort</option>
                                 <option value={4}>Merge sort (recursive)</option>
                                 <option value={5}>Merge sort (iterative)</option>
-                                <option value={6}>Cocktail sort</option>
-                                <option value={7}>Quick sort</option>
-                                <option value={8}>Heap sort</option>
+                                <option value={6}>Quick sort</option>
+                                <option value={7}>Heap sort</option>
+                                <option value={8}>Shell sort</option>
+                                <option value={-1} disabled> </option>
+                                <option value={9}>Cocktail sort</option>
                             </select>
 
                         </div>
