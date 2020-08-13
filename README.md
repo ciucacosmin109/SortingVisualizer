@@ -3,7 +3,7 @@
 
 This is a web application used to visualize different sorting algorithms on a random set of data represented by vertical bars.
 
-I made this project to enter into the front-end web development by learning javascript+react and to recap and learn different sorting algorithms.
+I made this project to learn front-end web development with javascript+react and to recap/learn different sorting algorithms.
 
 It is built with Javascript, React.JS and it's also a [progressive web application](https://developers.google.com/web/progressive-web-apps).
 
