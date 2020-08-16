@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 
+import './About.css';
+ 
 export class About extends Component{
     static displayName = About.name;
  
     render(){
-        return (<>
+        return ( <div className="about">
             <div className="card">
                 <div className="card-header">
-                    <h4>About</h4>
+                    <h6>About</h6>
                 </div>
 
                 <div className="card-body"> 
                     <p>This is a web application used to visualize different sorting algorithm on a random set of data represented by vertical bars.</p>
-                    <p>I made this project to enter into the front-end web development by learning javascript+react and to recap and learn different sorting algorithms.</p>
+                    <p>I made this project to learn front-end web development with javascript+react and to recap/learn different sorting algorithms.</p>
                     <p>It is built with Javascript, React.JS and it's also a <a href="https://developers.google.com/web/progressive-web-apps">progressive web application</a>.</p>
                     <p>You can access a deployed version at <a href="https://ciucacosmin109.github.io/SortingVisualizer">Github pages</a>.</p>
                        
@@ -20,7 +22,7 @@ export class About extends Component{
             </div>
             <div className="card">
                 <div className="card-header">
-                    <h4>Download a local version</h4>
+                    <h6>Download a local version</h6>
                 </div>
 
                 <div className="card-body">   
@@ -40,7 +42,7 @@ export class About extends Component{
             </div>
             <div className="card">
                 <div className="card-header">
-                    <h4>License</h4>
+                    <h6>License</h6>
                 </div>
 
                 <div className="card-body">    
@@ -48,6 +50,6 @@ export class About extends Component{
 
                 </div>
             </div>
-        </>);
+        </div>);
     }
 }

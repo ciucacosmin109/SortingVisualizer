@@ -1,0 +1,9 @@
+.about .card {
+    margin: 0;
+    margin-bottom: 10px;
+}
+.about .card .card-header, 
+.about .card .card-body, 
+.about .card .card-footer {
+    padding: 10px; 
+}

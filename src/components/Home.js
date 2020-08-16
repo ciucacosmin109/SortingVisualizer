@@ -16,13 +16,16 @@ import { ShellSort } from '../algorithms/ShellSort';
 
 const INITIAL_ARRAY_SIZE = 100;
 const MAX_ARRAY_ELEMENT = 300;
-const ALLOWED_DELAYS = [1000, 300, 100, 40, 10, 1];
+const ALLOWED_DELAYS = [1000, 300, 100, 40, 15, 1];
 
 const INITIAL_COLOR = "darkgray";
 const SORTED_COLOR = "green";
 const COMPARE_COLOR = "red";
+const SWAP_COLOR = "red";
 const REPLACE_COLOR = "violet";
  
+const MIN_FREQ = 180;
+const MAX_FREQ = 750;
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -40,6 +43,7 @@ export class Home extends Component {
 
             playing: false, // Used by the Plaay/Pause button
             delay: 1, // Used by the speed slider = [1,100]
+            soundEnabled: false,
 
             update: true // To trigger the render method when not using this.setState(...);
         };
@@ -57,6 +61,14 @@ export class Home extends Component {
         this.config = {
             arraySize : INITIAL_ARRAY_SIZE
         };
+
+        this.sound = { 
+            // one audioContext per document
+            audioContext : null,
+            gainNode : null,
+            oscillator : null
+        };   
+
     } 
     componentDidMount() { this.generateNewArray(); } // Generate a new array everytime the user opens up the sorting page
     componentWillUnmount() { this.stopSortAnimation(); } // Stop the animation if the user goes to another page
@@ -90,6 +102,45 @@ export class Home extends Component {
         }
     }
 
+    initSoundService(){   
+        this.deleteSoundService();
+
+        this.sound.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        this.sound.gainNode = this.sound.audioContext.createGain()
+        this.sound.gainNode.gain.value = 0.15 
+        this.sound.gainNode.connect(this.sound.audioContext.destination)
+
+        this.sound.oscillator = this.sound.audioContext.createOscillator();
+        this.sound.oscillator.type = 'sine'; // sine, square, sawtooth, triangle
+        this.sound.oscillator.frequency.value = 0; 
+        this.sound.oscillator.connect(this.sound.gainNode);
+        
+        this.sound.oscillator.start(this.sound.audioContext.currentTime); 
+    } 
+    deleteSoundService(){ 
+        if(this.sound.oscillator === null)
+            return;
+        
+        this.sound.oscillator.stop(this.sound.audioContext.currentTime); 
+        this.sound.oscillator = null;
+
+        this.sound.gainNode.disconnect();
+        this.sound.gainNode = null;
+        
+        this.sound.audioContext.close();
+        this.sound.audioContext = null;
+    }
+    setOscillatorFrequency(val){
+        if(this.sound.oscillator !== null)
+            this.sound.oscillator.frequency.value = 
+                val / MAX_ARRAY_ELEMENT * (MAX_FREQ - MIN_FREQ) + MIN_FREQ;
+    }
+    clearOscillatorFrequency(){
+        if(this.sound.oscillator !== null)
+            this.sound.oscillator.frequency.value = 0;
+    }
+
     playAnimations(animations) {
         if (animations.length === 0) {
             this.instantSort();
@@ -98,20 +149,22 @@ export class Home extends Component {
         this.animState.currentStep = 0;
         this.animState.numberOfSteps = animations.length;
         this.animState.toUncolor = [];
-        this.paintArray(INITIAL_COLOR)
+        this.paintArray(INITIAL_COLOR);
 
+        // Start the sound oscillator  
+        this.initSoundService();
+          
+        // Start the loop
         this.animState.loopFunction = () => {
             let i = this.animState.currentStep;
 
             // End the loop
             if (i >= this.animState.numberOfSteps) {
-                clearInterval(this.animState.loop);
+                this.stopSortAnimation(); 
                 this.paintArray(SORTED_COLOR);
-
-                this.animState.currentStep = 0;
-                this.setState({ playing: false });
+ 
                 return;
-            }
+            } 
 
             // Play the animation
             if (SortResult.isEmptyAnimation(animations[i])) {
@@ -119,7 +172,7 @@ export class Home extends Component {
                 while (this.animState.toUncolor.length > 0) {
                     this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
-            } else if (SortResult.isCompareAnimation(animations[i])) { 
+            } else if (SortResult.isCompareAnimation(animations[i]) && ( this.state.delay !== 1 || this.state.playing === false )) { 
                 // Uncolor the last colored elements
                 while (this.animState.toUncolor.length > 0) {
                     this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
@@ -137,8 +190,8 @@ export class Home extends Component {
                     this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
                 }
 
-                this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
-                this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
+                this.paintArrayIndex(SWAP_COLOR, animations[i].i);
+                this.paintArrayIndex(SWAP_COLOR, animations[i].j);
                 
                 let a = animations[i].i;
                 let b = animations[i].j;
@@ -150,7 +203,12 @@ export class Home extends Component {
                 this.state.array[b] = temp;
 
                 this.setState({ update: true });
-
+ 
+                // Modify the SOUND
+                if(this.state.soundEnabled) 
+                    this.setOscillatorFrequency((this.state.array[a]+this.state.array[b])/2);
+                else this.clearOscillatorFrequency();
+ 
                 // Store indices to uncolor
                 this.animState.toUncolor.push(animations[i].i, animations[i].j);
 
@@ -169,6 +227,9 @@ export class Home extends Component {
                     // eslint-disable-next-line
                     this.state.array[k] = animations[i].subArrayToReplace[k - animations[i].i];
                 }
+                this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
+                this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
+
                 this.setState({ update: true });
 
             }
@@ -247,17 +308,27 @@ export class Home extends Component {
         this.playAnimations(sortResult.animations);
     }
     resumeSortAnimation() {
+        // Start the sound oscillator  
+        this.initSoundService();
+        
         this.setState({ playing: true });
         this.animState.loop = setInterval(this.animState.loopFunction, this.state.delay); 
     }
     pauseSortAnimation() {
         clearInterval(this.animState.loop); 
+
+        // Stop the sound oscillator
+        this.deleteSoundService(); 
+
         this.setState({ playing: false });
     }
     stopSortAnimation() {
         clearInterval(this.animState.loop);
         this.animState.currentStep = 0; 
         this.paintArray(INITIAL_COLOR);
+
+        // Stop the sound oscillator
+        this.deleteSoundService(); 
 
         this.setState({ playing: false });
     }
@@ -279,9 +350,9 @@ export class Home extends Component {
         this.config.arraySize = v;
         this.setState({ update: true });
     }
-    render() {
+    render() { 
         return (
-            <div>
+            <div className="home">
                 <div className="card">
                     <div className="card-header">
                         <div className="form-inline">
@@ -309,7 +380,7 @@ export class Home extends Component {
                         <button className="btn btn-success btn-sm"
                             onClick={() => this.instantSort()}>Instant sort</button>
                         
-                        <div className="range-input form-inline">
+                        <div className="range-input form-inline div-right">
                             <label htmlFor="sizeRangeSlider">Array's size: {this.config.arraySize}</label>
                             <input type="range" className="slider" id="sizeRangeSlider"
                                 min="10" max="500" value={this.config.arraySize} 
@@ -340,7 +411,7 @@ export class Home extends Component {
                             {" > Next"}
                         </button>
 
-                        <div className="range-input form-inline">
+                        <div className="range-input form-inline div-right">
                             <label htmlFor="speedRangeSlider">Speed: {ALLOWED_DELAYS.indexOf(this.state.delay) + 1}x</label>
                             <input type="range" className="slider" id="speedRangeSlider"
                                 min="1" max={ALLOWED_DELAYS.length}
@@ -353,6 +424,14 @@ export class Home extends Component {
                 <div className="card">
                     <div className="card-header">
                         <h6>View</h6>
+
+                        
+                        <div className="form-check div-right">
+                            <input type="checkbox" className="form-check-input" id="soundCheck"
+                                checked={this.state.soundEnabled}
+                                onChange={()=> this.setState({soundEnabled: !this.state.soundEnabled})}/>
+                            <label className="form-check-label" htmlFor="soundCheck">Sound</label>
+                        </div>
                     </div>
 
                     <div className="card-body render-zone">
