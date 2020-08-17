@@ -38,32 +38,29 @@ export class Home extends Component {
                 width: window.innerWidth,
                 height: window.innerHeight
             },*/
-            algorithmId: 7, // Used by the algo combo-box
-            array: [], // The current array
-
+            array: [], // The current array 
             playing: false, // Used by the Plaay/Pause button
+ 
+            algorithmId: 7, // Used by the algo combo-box
+            arraySize : INITIAL_ARRAY_SIZE, // Used by the array size slider 10-500
             delay: 1, // Used by the speed slider = [1,100]
-            soundEnabled: false,
-
+            soundEnabled: true,
+             
             update: true // To trigger the render method when not using this.setState(...);
         };
 
         this.animState = {
-            loop: null, // The timer for the steps: used by the speedslider when changing the speed
-            loopFunction: null, // The function that will be called at each step by the 'loop'
-
+            loop: null, // The timer for the steps: used by the speedslider when changing the speed 
+            loopFunction: null,
+            
+            animations: null, // Animations from SortResult
             currentStep: 0, // To be able to go to the next step
-            numberOfSteps: 0, // The totla number of steps
+            numberOfSteps: 0, // The total number of steps
 
             toUncolor: [] // The elements that need to be uncolored
         };
-         
-        this.config = {
-            arraySize : INITIAL_ARRAY_SIZE
-        };
-
-        this.sound = { 
-            // one audioContext per document
+          
+        this.sound = {  
             audioContext : null,
             gainNode : null,
             oscillator : null
@@ -81,7 +78,7 @@ export class Home extends Component {
         }
 
         let arr = [];
-        for (let i = 0; i < this.config.arraySize; i++) {
+        for (let i = 0; i < this.state.arraySize; i++) {
             arr.push(randomNumber(1, MAX_ARRAY_ELEMENT));
         }
         this.setState({ array: arr }); 
@@ -140,106 +137,7 @@ export class Home extends Component {
         if(this.sound.oscillator !== null)
             this.sound.oscillator.frequency.value = 0;
     }
-
-    playAnimations(animations) {
-        if (animations.length === 0) {
-            this.instantSort();
-            return;
-        }
-        this.animState.currentStep = 0;
-        this.animState.numberOfSteps = animations.length;
-        this.animState.toUncolor = [];
-        this.paintArray(INITIAL_COLOR);
-
-        // Start the sound oscillator  
-        this.initSoundService();
-          
-        // Start the loop
-        this.animState.loopFunction = () => {
-            let i = this.animState.currentStep;
-
-            // End the loop
-            if (i >= this.animState.numberOfSteps) {
-                this.stopSortAnimation(); 
-                this.paintArray(SORTED_COLOR);
  
-                return;
-            } 
-
-            // Play the animation
-            if (SortResult.isEmptyAnimation(animations[i])) {
-                // Uncolor the last colored elements
-                while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
-                }
-            } else if (SortResult.isCompareAnimation(animations[i]) && ( this.state.delay !== 1 || this.state.playing === false )) { 
-                // Uncolor the last colored elements
-                while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
-                }
-
-                this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
-                this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
-
-                // Store indices to uncolor
-                this.animState.toUncolor.push(animations[i].i, animations[i].j);
-
-            } else if (SortResult.isSwapAnimation(animations[i])) {
-                // Uncolor the last colored elements
-                while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
-                }
-
-                this.paintArrayIndex(SWAP_COLOR, animations[i].i);
-                this.paintArrayIndex(SWAP_COLOR, animations[i].j);
-                
-                let a = animations[i].i;
-                let b = animations[i].j;
-
-                let temp = this.state.array[a];
-                // eslint-disable-next-line
-                this.state.array[a] = this.state.array[b];
-                // eslint-disable-next-line
-                this.state.array[b] = temp;
-
-                this.setState({ update: true });
- 
-                // Modify the SOUND
-                if(this.state.soundEnabled) 
-                    this.setOscillatorFrequency((this.state.array[a]+this.state.array[b])/2);
-                else this.clearOscillatorFrequency();
- 
-                // Store indices to uncolor
-                this.animState.toUncolor.push(animations[i].i, animations[i].j);
-
-            } else if (SortResult.isReplaceAnimation(animations[i])) {
-                // Uncolor the last colored elements
-                while (this.animState.toUncolor.length > 0) {
-                    this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
-                }
-
-                for (let k = animations[i].i; k <= animations[i].j; k++) {
-                    this.paintArrayIndex(REPLACE_COLOR, k);
-                    
-                    // Store indices to uncolor
-                    this.animState.toUncolor.push(k); 
-
-                    // eslint-disable-next-line
-                    this.state.array[k] = animations[i].subArrayToReplace[k - animations[i].i];
-                }
-                this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
-                this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
-
-                this.setState({ update: true });
-
-            }
-
-            // Update the current step
-            this.animState.currentStep++;
-        };
-        this.animState.loop = setInterval(this.animState.loopFunction, this.state.delay);
-
-    }
 
     getSortResult(modifyTheOriginal = false) { // returns a SortResult object based on selected algorithm
         let sortResult;
@@ -275,6 +173,7 @@ export class Home extends Component {
                 break;
         }
         console.log(sortResult);
+        console.log(this.state);
 
         return sortResult;
     }
@@ -292,47 +191,161 @@ export class Home extends Component {
         }
     }
 
+    loopFunction() {
+        let i = this.animState.currentStep;
+        let animations = this.animState.animations;
+
+        // Skip useless animations at high speed
+        while( this.state.delay === 1 && 
+            this.state.playing === true && 
+            SortResult.isCompareAnimation(animations[this.animState.currentStep]) 
+        ) {  
+            this.animState.currentStep++; 
+            i++;
+        }
+
+        // End the loop
+        if (i >= this.animState.numberOfSteps) {
+            this.stopSortAnimation(); 
+            this.paintArray(SORTED_COLOR);
+
+            return;
+        } 
+
+        // Play the animation
+        if (SortResult.isWaitAnimation(animations[i])) {
+            // Uncolor the last colored elements
+            while (this.animState.toUncolor.length > 0) {
+                this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
+            }
+        } else if (SortResult.isCompareAnimation(animations[i])) {  
+            // Uncolor the last colored elements
+            while (this.animState.toUncolor.length > 0) {
+                this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
+            }
+
+            this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
+            this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
+
+            // Store indices to uncolor
+            this.animState.toUncolor.push(animations[i].i, animations[i].j);
+
+        } else if (SortResult.isSwapAnimation(animations[i])) {
+            // Uncolor the last colored elements
+            while (this.animState.toUncolor.length > 0) {
+                this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
+            }
+
+            this.paintArrayIndex(SWAP_COLOR, animations[i].i);
+            this.paintArrayIndex(SWAP_COLOR, animations[i].j);
+            
+            let a = animations[i].i;
+            let b = animations[i].j;
+
+            let temp = this.state.array[a];
+            // eslint-disable-next-line
+            this.state.array[a] = this.state.array[b];
+            // eslint-disable-next-line
+            this.state.array[b] = temp;
+
+            this.setState({ update: true });
+
+            // Modify the SOUND
+            if(this.state.soundEnabled) 
+                this.setOscillatorFrequency((this.state.array[a]+this.state.array[b])/2);
+            else this.clearOscillatorFrequency();
+
+            // Store indices to uncolor
+            this.animState.toUncolor.push(animations[i].i, animations[i].j);
+
+        } else if (SortResult.isReplaceAnimation(animations[i])) {
+            // Uncolor the last colored elements
+            while (this.animState.toUncolor.length > 0) {
+                this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
+            }
+
+            for (let k = animations[i].i; k <= animations[i].j; k++) {
+                this.paintArrayIndex(REPLACE_COLOR, k);
+                
+                // Store indices to uncolor
+                this.animState.toUncolor.push(k); 
+
+                // eslint-disable-next-line
+                this.state.array[k] = animations[i].subArrayToReplace[k - animations[i].i];
+            }
+            this.paintArrayIndex(COMPARE_COLOR, animations[i].i);
+            this.paintArrayIndex(COMPARE_COLOR, animations[i].j);
+            
+            // Modify the SOUND
+            if(this.state.soundEnabled) 
+                this.setOscillatorFrequency((this.state.array[animations[i].i]+this.state.array[animations[i].j])/2);
+            else this.clearOscillatorFrequency();
+ 
+            this.setState({ update: true });
+
+        }
+
+        // Update the current step
+        this.animState.currentStep++;
+    }
     startSortAnimation() {
-        if (this.animState.currentStep !== 0)
-            return; 
+        if (this.animState.currentStep !== 0){
+            this.resumeSortAnimation();
+            return;
+        }  
 
+        // Get the animations
         this.stopSortAnimation();
-        this.setState({ playing: true });
-
         let sortResult = this.getSortResult();  
         if (typeof sortResult === 'undefined') { 
             this.setState({ playing: false });
             return; 
+        } 
+        if (sortResult.animations.length === 0) {
+            this.instantSort();
+            return;
         }
+        this.setState({ playing: true });
+ 
+        // Play ----------------------------------------------
+        // Init
+        this.animState.animations = sortResult.animations; 
+        this.animState.currentStep = 0; 
+        this.animState.numberOfSteps = sortResult.animations.length;
+        this.animState.toUncolor = [];
+        this.paintArray(INITIAL_COLOR);
 
-        this.playAnimations(sortResult.animations);
-    }
-    resumeSortAnimation() {
         // Start the sound oscillator  
         this.initSoundService();
-        
+          
+        // Start the loop
+        this.animState.loopFunction = () => this.loopFunction();
+        this.animState.loop = setInterval(this.animState.loopFunction, this.state.delay);
+
+    }
+    resumeSortAnimation() {
         this.setState({ playing: true });
-        this.animState.loop = setInterval(this.animState.loopFunction, this.state.delay); 
+        this.animState.loop = setInterval(this.animState.loopFunction, this.state.delay);
+
+        // Start the sound oscillator  
+        this.initSoundService(); 
     }
     pauseSortAnimation() {
         clearInterval(this.animState.loop); 
+        this.setState({ playing: false });
 
         // Stop the sound oscillator
-        this.deleteSoundService(); 
-
-        this.setState({ playing: false });
+        this.deleteSoundService();  
     }
     stopSortAnimation() {
         clearInterval(this.animState.loop);
         this.animState.currentStep = 0; 
-        this.paintArray(INITIAL_COLOR);
+        this.paintArray(INITIAL_COLOR); 
+        this.setState({ playing: false });
 
         // Stop the sound oscillator
-        this.deleteSoundService(); 
-
-        this.setState({ playing: false });
-    }
-     
+        this.deleteSoundService();  
+    } 
     playNext() { this.animState.loopFunction(); }
 
     onAlgorithmChange = (event) => {
@@ -344,11 +357,9 @@ export class Home extends Component {
         let v = parseInt(event.target.value);
         this.setState({ delay: ALLOWED_DELAYS[v - 1] }/*, () => this.startSortAnimation()*/);
     }
-    onArraySizeChange = (event) => {
-        //this.pauseSortAnimation();
-        let v = parseInt(event.target.value);
-        this.config.arraySize = v;
-        this.setState({ update: true });
+    onArraySizeChange = (event) => { 
+        let v = parseInt(event.target.value); 
+        this.setState({ arraySize: v });
     }
     render() { 
         return (
@@ -381,9 +392,9 @@ export class Home extends Component {
                             onClick={() => this.instantSort()}>Instant sort</button>
                         
                         <div className="range-input form-inline div-right">
-                            <label htmlFor="sizeRangeSlider">Array's size: {this.config.arraySize}</label>
+                            <label htmlFor="sizeRangeSlider">Array's size: {this.state.arraySize}</label>
                             <input type="range" className="slider" id="sizeRangeSlider"
-                                min="10" max="500" value={this.config.arraySize} 
+                                min="10" max="500" value={this.state.arraySize} 
                                 onChange={this.onArraySizeChange} />
                         </div> 
                     </div>
@@ -429,7 +440,7 @@ export class Home extends Component {
                         <div className="form-check div-right">
                             <input type="checkbox" className="form-check-input" id="soundCheck"
                                 checked={this.state.soundEnabled}
-                                onChange={()=> this.setState({soundEnabled: !this.state.soundEnabled})}/>
+                                onChange={()=> this.setState({ soundEnabled: !this.state.soundEnabled })}/>
                             <label className="form-check-label" htmlFor="soundCheck">Sound</label>
                         </div>
                     </div>
