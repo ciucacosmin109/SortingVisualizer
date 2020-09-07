@@ -4,8 +4,8 @@ import { Route } from 'react-router';
 import './custom.css'
 
 import { Layout } from './components/Layout';
-import { Home } from './components/Home'; 
-import { About } from './components/About';
+import { Home } from './scenes/Home'; 
+import { About } from './scenes/About';
  
 export default class App extends Component {
     static displayName = App.name;

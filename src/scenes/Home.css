@@ -57,13 +57,13 @@
 } 
  
  
-.home .render-zone {
+.home .card .render-zone {
     display: flex;
     flex-flow: row;
+    margin:0; 
 } 
-.home .render-zone .vertical-bar{
+.home .card .render-zone *{
     flex: 1; 
-    margin:0;
-    background-color:darkgray; 
+    margin:0; 
 } 
 

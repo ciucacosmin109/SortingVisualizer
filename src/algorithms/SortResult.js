@@ -1,33 +1,4 @@
-﻿/* 
-sortedArray : []
-animations : [...]
-
-*/
-
-export class SortWaitAnimation { } 
-export class SortCompareAnimation {
-    constructor(i_idx, j_idx) {
-        this.i = i_idx;
-        this.j = j_idx;
-    }
-}
-export class SortSwapAnimation {
-    constructor(i_idx, j_idx/*,newSortedElem*/) {
-        this.i = i_idx;
-        this.j = j_idx;
-
-        //this.newSortedElements = newSortedElem;
-    }
-} 
-export class SortReplaceAnimation {
-    constructor(i_idx, j_idx, subArrToReplace) {
-        this.i = i_idx;
-        this.j = j_idx;
-         
-        this.subArrayToReplace = subArrToReplace;
-    }
-}
-
+﻿
 export class SortResult {
     constructor() { 
         this.sortedArray = []; 
@@ -61,6 +32,30 @@ export class SortResult {
     static isCompareAnimation(animation) { return (animation instanceof SortCompareAnimation); }
     static isSwapAnimation(animation) { return ( animation instanceof SortSwapAnimation ); }
     static isReplaceAnimation(animation) { return (animation instanceof SortReplaceAnimation); }
-
-
+ 
 }
+
+// Animations
+export class SortCompareAnimation {
+    constructor(i_idx, j_idx) {
+        this.i = i_idx;
+        this.j = j_idx;
+    }
+}
+export class SortSwapAnimation {
+    constructor(i_idx, j_idx/*,newSortedElem*/) {
+        this.i = i_idx;
+        this.j = j_idx;
+
+        //this.newSortedElements = newSortedElem;
+    }
+} 
+export class SortReplaceAnimation {
+    constructor(i_idx, j_idx, subArrToReplace) {
+        this.i = i_idx;
+        this.j = j_idx;
+         
+        this.subArrayToReplace = subArrToReplace;
+    }
+}
+export class SortWaitAnimation { } 

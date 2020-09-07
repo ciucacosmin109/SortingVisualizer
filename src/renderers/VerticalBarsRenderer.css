@@ -1,0 +1,10 @@
+.vbars-render-zone {
+    display: flex;
+    flex-flow: row;
+} 
+.vbars-render-zone .vertical-bar{
+    flex: 1; 
+    margin:0;
+    background-color:darkgray; 
+} 
+
