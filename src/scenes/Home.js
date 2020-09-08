@@ -1,6 +1,7 @@
-import React, { Component } from 'react';
-import { SoundPlayer } from '../utils/SoundPlayer'
-import { VerticalBarsRenderer, SORTED_COLOR } from '../renderers/VerticalBarsRenderer';
+import React, { Component } from 'react'; 
+import { SoundPlayer } from '../utils/SoundPlayer';
+import { VerticalBarsRenderer } from '../renderers/VerticalBarsRenderer';
+import { ColorsRenderer } from '../renderers/ColorsRenderer';
 
 import './Home.css';
  
@@ -14,9 +15,7 @@ import { CocktailSort } from '../algorithms/CocktailSort.js';
 import { QuickSort } from '../algorithms/QuickSort.js';
 import { HeapSort } from '../algorithms/HeapSort';
 import { ShellSort } from '../algorithms/ShellSort';
- 
-const INITIAL_ARRAY_SIZE = 100;
-const MAX_ARRAY_ELEMENT = 300;
+  
 const ALLOWED_DELAYS = [1000, 300, 100, 40, 15, 1];
  
 export class Home extends Component {
@@ -29,9 +28,10 @@ export class Home extends Component {
             array: [], // The current array  
  
             algorithmId: 7, // Used by the algo combo-box
-            arraySize : INITIAL_ARRAY_SIZE, // Used by the array size slider 10-500
+            rendererId: 1, // Used by the renderer combo-box
+            arraySize : 100, // Used by the array size slider 10-500
 
-            playing: false,
+            playing: false, // Used by the Play/Pause/Stop buttons
             delay: 1, // Used by the speed slider = [1,100]
             soundEnabled: true // Used by the checkbox 
         };
@@ -39,25 +39,9 @@ export class Home extends Component {
         this.renderer = new VerticalBarsRenderer();
         this.sound = new SoundPlayer();
     } 
-    componentDidMount() { this.generateNewArray(); }   
+    componentDidMount() { this.onNewArrayClick(); }   
     componentWillUnmount() { this.stopSortAnimation(); }  
- 
-    generateNewArray() { 
-        let randomNumber = (a, b) => {
-            return Math.floor(Math.random() * (b - a) + a);
-        }
-
-        let arr = [];
-        for (let i = 0; i < this.state.arraySize; i++) {
-            arr.push(randomNumber(1, MAX_ARRAY_ELEMENT));
-        }
-        this.setState({ array: arr },()=>{ 
-            if(this.renderer !== null){ 
-                this.renderer.setArray(this.state.array);
-            }
-        });  
-    }
-  
+    
     getSortResult(modifyTheOriginal = false) { // returns a SortResult object based on selected algorithm
         let sortResult;
         switch (this.state.algorithmId) {
@@ -94,14 +78,7 @@ export class Home extends Component {
         console.log(sortResult); 
 
         return sortResult;
-    }
-    instantSort() {  
-        this.stopSortAnimation();
-
-        // Sorts the array
-        this.getSortResult(true);  
-        this.renderer.paintArray(SORTED_COLOR);
-    }
+    } 
 
     // Methods for controling the renderer and the sound player
     startSortAnimation() { 
@@ -110,8 +87,8 @@ export class Home extends Component {
         if (typeof sortResult === 'undefined') {  
             return; 
         } 
-        if (sortResult.animations.length === 0) {
-            this.instantSort();
+        if (sortResult.animations.length === 0) { 
+            this.getSortResult(true);  
             return;
         }
 
@@ -142,24 +119,29 @@ export class Home extends Component {
         // Stop the sound oscillator
         this.sound.deleteSoundService();  
     } 
-    playNext() { this.renderer.next(); }
-
-    updateSound(a, b){ 
-        if(this.state.soundEnabled) 
-            this.sound.setOscillatorFrequency((a+b)/2, MAX_ARRAY_ELEMENT);
-        else 
-            this.sound.clearOscillatorFrequency(); 
+    playNext() { 
+        this.renderer.next(); 
     }
 
-    // Controls handlers
+    // Control handlers
     onAlgorithmChange = (event) => {
         let newId = parseInt(event.target.value);
         this.setState({ algorithmId: newId });
+    }
+    onRendererChange = (event) => {
+        if(this.renderer != null)
+            this.stopSortAnimation();
+
+        let newId = parseInt(event.target.value);
+        this.renderer = this.returnRenderer(newId);
+
+        this.setState({ rendererId: newId });
     }
     onSpeedChange = (event) => {
         let resume = this.renderer.isPlaying();
         let v = parseInt(event.target.value);
 
+        // Pause renderer
         this.renderer.pause(); 
         this.setState({playing: false});
          
@@ -171,10 +153,32 @@ export class Home extends Component {
         });
     }
     onArraySizeChange = (event) => { 
-        let v = parseInt(event.target.value); 
+        let v = parseInt(event.target.value);  
         this.setState({ arraySize: v });
     } 
-    onPlayButtonClick(){ 
+    onSoundCheckChanged = (event) => { 
+        this.setState({ soundEnabled: !this.state.soundEnabled },()=>{
+            if(this.state.soundEnabled === false){
+                this.sound.clearOscillatorFrequency(); 
+            }
+        });
+    }
+    updateSound = (a, b) => { 
+        if(this.state.soundEnabled) 
+            this.sound.setOscillatorFrequency((a+b)/2, Math.max(...this.state.array));
+        else 
+            this.sound.clearOscillatorFrequency(); 
+    }
+    
+    // Button handlers
+    onNewArrayClick() {  
+        if(this.renderer == null)
+            return;
+
+        let arr = this.renderer.newRandomArray(this.state.arraySize);
+        this.setState({array: arr});
+    }
+    onPlayClick(){ 
         if(!this.renderer.isPlaying() && this.renderer.getCurrentStep() === 0)
             this.startSortAnimation();
         else if(!this.renderer.isPlaying())
@@ -201,61 +205,37 @@ export class Home extends Component {
                                 <option value={6}>Quick sort</option>
                                 <option value={7}>Heap sort</option>
                                 <option value={8}>Shell sort</option>
-                                <option value={-1} disabled> </option>
+                                <option value={-1} disabled></option>
                                 <option value={9}>Cocktail sort</option>
                             </select>
 
                         </div>
                     </div>
 
-                    { this.renderer != null ? <>
-                        <div className="card-header">
-                            <button className="btn btn-primary btn-sm"
-                                onClick={() => {
+                    <div className="card-header">
+                        <button className="btn btn-primary btn-sm"
+                            onClick={() => {
+                                if(this.renderer != null)
                                     this.stopSortAnimation();
-                                    this.generateNewArray();
-                                }}>New array</button>
-
-                            <button className="btn btn-success btn-sm"
-                                onClick={() => this.instantSort()}>Instant sort</button>
+                                this.onNewArrayClick();
+                            }}>New array</button>
                             
-                            <div className="range-input form-inline div-right">
-                                <label htmlFor="sizeRangeSlider">Array's size: {this.state.arraySize}</label>
-                                <input type="range" className="slider" id="sizeRangeSlider"
-                                    min="10" max="500" value={this.state.arraySize} 
-                                    onChange={this.onArraySizeChange} />
-                            </div> 
-                        </div>
+                        <select className="btn btn-sm combo-box" id="selectAlgoDropDown"
+                            onChange={this.onRendererChange} value={this.state.rendererId}>
+                            <option value={1}>Vertical bars</option>
+                            <option value={2}>Colors</option> 
+                        </select>
+
+                        <div className="range-input form-inline div-right">
+                            <label htmlFor="sizeRangeSlider">Array's size: {this.state.arraySize}</label>
+                            <input type="range" className="slider" id="sizeRangeSlider"
+                                min="10" max="500" value={this.state.arraySize} 
+                                onChange={this.onArraySizeChange} />
+                        </div> 
+                    </div>
                     
-                        <div className="card-body"> 
-                            <button
-                                onClick={() => this.onPlayButtonClick()}
-                                className={"btn btn-sm " + (!this.state.playing && this.renderer.getCurrentStep() === 0
-                                    ? "btn-success"
-                                    : "btn-warning")}>
+                    { this.renderer != null ? this.renderControls() : null }
 
-                                {!this.state.playing && this.renderer.getCurrentStep() === 0
-                                    ? " > Play"
-                                    : (!this.state.playing ? " > Resume" : " | | Pause")}
-                            </button>
-                            <button onClick={() => this.stopSortAnimation()} className="btn btn-danger btn-sm">Stop</button>
-
-                            <button onClick={!this.state.playing && this.renderer.getCurrentStep() !== 0 ? () => this.playNext() : () => null}
-                                disabled={this.state.playing || this.renderer.getCurrentStep() === 0}
-                                className="btn btn-sm btn-warning">
-                                {" > Next"}
-                            </button>
-
-                            <div className="range-input form-inline div-right">
-                                <label htmlFor="speedRangeSlider">Speed: {ALLOWED_DELAYS.indexOf(this.state.delay) + 1}x</label>
-                                <input type="range" className="slider" id="speedRangeSlider"
-                                    min="1" max={ALLOWED_DELAYS.length}
-                                    value={ALLOWED_DELAYS.indexOf(this.state.delay) + 1} 
-                                    onChange={this.onSpeedChange} />
-                            </div> 
-                        </div></>
-                        : null
-                    }
                 </div>
 
                 <div className="card">
@@ -265,22 +245,84 @@ export class Home extends Component {
                         <div className="form-check div-right">
                             <input type="checkbox" className="form-check-input" id="soundCheck"
                                 checked={this.state.soundEnabled}
-                                onChange={()=> this.setState({ soundEnabled: !this.state.soundEnabled })}/>
+                                onChange={this.onSoundCheckChanged}/>
                             <label className="form-check-label" htmlFor="soundCheck">Sound</label>
                         </div>
                     </div>
 
                     <div className="card-body render-zone"> 
-                        <VerticalBarsRenderer 
-                            ref={x => this.renderer = x} 
-                            array={this.state.array} 
-                            onSwap={(a,b) => this.updateSound(a,b)}
-                            onAnimationFinished={()=> this.stopSortAnimation()}
-                        />
+                        {this.renderView()}
                     </div>
                 </div>
             </div>
         );
     }
+    renderControls(){
+        return (
+            <div className="card-body"> 
+                <button
+                    onClick={() => this.onPlayClick()}
+                    className={"btn btn-sm " + (!this.state.playing && this.renderer.getCurrentStep() === 0
+                        ? "btn-success"
+                        : "btn-warning")}>
 
+                    {!this.state.playing && this.renderer.getCurrentStep() === 0
+                        ? " > Play"
+                        : (!this.state.playing ? " > Resume" : " | | Pause")}
+                </button>
+                <button onClick={() => this.stopSortAnimation()} className="btn btn-danger btn-sm">Stop</button>
+
+                <button onClick={!this.state.playing && this.renderer.getCurrentStep() !== 0 ? () => this.playNext() : () => null}
+                    disabled={this.state.playing || this.renderer.getCurrentStep() === 0}
+                    className="btn btn-sm btn-warning">
+                    {" > Next"}
+                </button>
+
+                <div className="range-input form-inline div-right">
+                    <label htmlFor="speedRangeSlider">Speed: {ALLOWED_DELAYS.indexOf(this.state.delay) + 1}x</label>
+                    <input type="range" className="slider" id="speedRangeSlider"
+                        min="1" max={ALLOWED_DELAYS.length}
+                        value={ALLOWED_DELAYS.indexOf(this.state.delay) + 1} 
+                        onChange={this.onSpeedChange} />
+                </div> 
+            </div> 
+        );
+    }
+    renderView(){
+        switch(this.state.rendererId){
+            case 1: return ( 
+                <VerticalBarsRenderer 
+                    ref={x => this.renderer = x} 
+                    array={this.state.array} 
+                    onSwap={(a,b) => this.updateSound(a,b)}
+                    onReplace={(a,b) => this.updateSound(a,b)} 
+                    onCompare={() => this.state.delay === ALLOWED_DELAYS[0] || this.state.delay === ALLOWED_DELAYS[1] 
+                        ? this.sound.clearOscillatorFrequency() : null}  
+                    onWait={() => this.state.delay === ALLOWED_DELAYS[0] || this.state.delay === ALLOWED_DELAYS[1] 
+                        ? this.sound.clearOscillatorFrequency() : null}  
+                    onAnimationFinished={()=> this.stopSortAnimation()}
+                />);
+            case 2: return (
+                <ColorsRenderer 
+                    ref={x => this.renderer = x} 
+                    array={this.state.array} 
+                    onSwap={(a,b) => this.updateSound(a,b)}
+                    onReplace={(a,b) => this.updateSound(a,b)} 
+                    onCompare={() => this.state.delay === ALLOWED_DELAYS[0] || this.state.delay === ALLOWED_DELAYS[1] 
+                        ? this.sound.clearOscillatorFrequency() : null}  
+                    onWait={() => this.state.delay === ALLOWED_DELAYS[0] || this.state.delay === ALLOWED_DELAYS[1] 
+                        ? this.sound.clearOscillatorFrequency() : null}  
+                    onAnimationFinished={()=> this.stopSortAnimation()}
+                />
+            );
+            default: return null; 
+        }
+    }
+    returnRenderer(rendererId){
+        switch(rendererId){
+            case 1: return new VerticalBarsRenderer(); 
+            case 2: return new ColorsRenderer(); 
+            default: return null; 
+        }
+    }
 }

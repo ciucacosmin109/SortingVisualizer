@@ -2,18 +2,21 @@ import React, { Component } from 'react';
 import { Utils } from '../utils/Utils'
 import { SortResult } from '../algorithms/SortResult.js'; 
 
-import './VerticalBarsRenderer.css'
+import './ColorsRenderer.css'
 
-export const MAX_ARRAY_ELEMENT = 359;
-
-export const INITIAL_COLOR = "darkgray";
-export const SORTED_COLOR = "green";
+export const INITIAL_COLOR = "darkgray"; 
 export const COMPARE_COLOR = "red";
 export const SWAP_COLOR = "red";
 export const REPLACE_COLOR = "violet";
- 
-export class VerticalBarsRenderer extends Component{ 
-    static displayName = VerticalBarsRenderer.name;
+
+export const COLOR_BAR_HEIGHT = 359;
+
+// HSL
+export const SATURATION = 82;
+export const LIGHTNESS =  56;
+
+export class ColorsRenderer extends Component{ 
+    static displayName = ColorsRenderer.name;
 
     constructor(props) {
         super(props);
@@ -26,44 +29,43 @@ export class VerticalBarsRenderer extends Component{
 
         this.animState = {
             loop: null, // The timer for the steps (this.loopFunction)
- 
-            playing: false, // To skip animations
+
+            playing: false, // To skip animations 
             delay: 1, // To skip animations
             
             animations: null, // Animations from SortResult
-            currentStep: 0, // To be able to go to the next step 
+            currentStep: 0, // To be able to go to the next step  
 
             toUncolor: [] // The elements that need to be uncolored
         };
             
         this.bars = []; // Refereces to vertical bars
     }   
-
-    // Specific methods
+    
+    // Specific methods 
     paintArray(color) {   
         for (let i = 0; i < this.state.array.length; i++) 
-            this.bars[i].style.backgroundColor = color; 
+            this.bars[i].children[0].style.backgroundColor = color; 
     }
     paintArrayIndex(color, index) {
         if (index < this.state.array.length && index >= 0)  
-            this.bars[index].style.backgroundColor = color; 
+            this.bars[index].children[0].style.backgroundColor = color; 
     }
     loopFunction = () => {
         let currentStep = this.animState.currentStep;
         let animations = this.animState.animations;
- 
+  
         // End the loop
         if (currentStep >= animations.length) {
             // Event
             if(this.props != null && this.props.onAnimationFinished != null)
                 this.props.onAnimationFinished();
             
-            this.stop(); 
-            this.paintArray(SORTED_COLOR); 
-            
+            this.stop();   
+            this.paintArray(INITIAL_COLOR); 
             return;
-        } 
-        
+        }  
+
         // Skip useless animations at high speed
         while( this.animState.delay === 1 && 
             this.animState.playing === true && 
@@ -78,17 +80,17 @@ export class VerticalBarsRenderer extends Component{
             this.animState.currentStep++; 
             currentStep++;
         }
-        
+ 
         // Uncolor the last colored elements
         while (this.animState.toUncolor.length > 0) {
             this.paintArrayIndex(INITIAL_COLOR, this.animState.toUncolor.pop());
         }
-        
+ 
         // Play the animation
         if (SortResult.isWaitAnimation(animations[currentStep])) { 
             // Event
             if(this.props != null && this.props.onWait != null)
-                this.props.onWait();
+                this.props.onWait(); 
 
         } else if (SortResult.isCompareAnimation(animations[currentStep])) {   
             this.paintArrayIndex(COMPARE_COLOR, animations[currentStep].i);
@@ -101,46 +103,50 @@ export class VerticalBarsRenderer extends Component{
             // Store indices to uncolor
             this.animState.toUncolor.push(animations[currentStep].i, animations[currentStep].j);
 
-        } else if (SortResult.isSwapAnimation(animations[currentStep])) { 
+        } else if (SortResult.isSwapAnimation(animations[currentStep])) {  
             let a = animations[currentStep].i;
             let b = animations[currentStep].j;
             
             this.paintArrayIndex(SWAP_COLOR, a);
             this.paintArrayIndex(SWAP_COLOR, b);
-             
+
             let temp = this.state.array[a];
             // eslint-disable-next-line
             this.state.array[a] = this.state.array[b];
             // eslint-disable-next-line
             this.state.array[b] = temp;
 
-            this.setState({update: true}); // because i'm not using setState above
+            this.forceUpdate(); // because i'm not using setState above
 
             // Event
             if(this.props != null && this.props.onSwap != null)
                 this.props.onSwap(this.state.array[a],this.state.array[b]);
-
+  
             // Store indices to uncolor
-            this.animState.toUncolor.push(animations[currentStep].i, animations[currentStep].j);
+            this.animState.toUncolor.push(a, b);
 
-        } else if (SortResult.isReplaceAnimation(animations[currentStep])) { 
-            for (let k = animations[currentStep].i; k <= animations[currentStep].j; k++) {
+        } else if (SortResult.isReplaceAnimation(animations[currentStep])) {  
+            let a = animations[currentStep].i;
+            let b = animations[currentStep].j;
+
+            for (let k = a; k <= b; k++) { 
                 this.paintArrayIndex(REPLACE_COLOR, k);
                 
                 // Store indices to uncolor
                 this.animState.toUncolor.push(k); 
 
                 // eslint-disable-next-line
-                this.state.array[k] = animations[currentStep].subArrayToReplace[k - animations[currentStep].i];
-            }
+                this.state.array[k] = animations[currentStep].subArrayToReplace[k - a];
+            } 
+
             this.paintArrayIndex(COMPARE_COLOR, animations[currentStep].i);
             this.paintArrayIndex(COMPARE_COLOR, animations[currentStep].j);
              
             // Event
             if(this.props != null && this.props.onReplace != null)
-                this.props.onReplace(this.state.array[animations[currentStep].i],this.state.array[animations[currentStep].j]);
+                this.props.onReplace(this.state.array[a],this.state.array[b]);
   
-            this.setState({update: true}); // because i'm not using setState above
+            this.forceUpdate(); // because i'm not using setState above 
 
         }
         
@@ -168,12 +174,10 @@ export class VerticalBarsRenderer extends Component{
         this.stop(); 
   
         // Init
-        this.animState.playing = true;
+        this.animState.playing = true; 
         this.animState.delay = delay;
         this.animState.animations = animations; 
-        this.animState.currentStep = 0;  
-        this.animState.toUncolor = [];
-        this.paintArray(INITIAL_COLOR);
+        this.animState.currentStep = 0;    
  
         // Start the loop 
         this.animState.loop = setInterval(this.loopFunction, delay);
@@ -183,7 +187,7 @@ export class VerticalBarsRenderer extends Component{
         if(this.state.array.length === 0) 
             return; 
 
-        this.animState.playing = true; 
+        this.animState.playing = true;  
         this.animState.delay = delay;
         this.animState.loop = setInterval(this.loopFunction, delay); 
     }
@@ -195,9 +199,9 @@ export class VerticalBarsRenderer extends Component{
         this.animState.playing = false;
 
         clearInterval(this.animState.loop);
-        this.animState.currentStep = 0; 
-        this.paintArray(INITIAL_COLOR); 
+        this.animState.currentStep = 0;  
     }
+
     // Mandatory methods 2
     next() { 
         this.loopFunction(); 
@@ -212,7 +216,7 @@ export class VerticalBarsRenderer extends Component{
     newRandomArray(size){ 
         let arr = [];
         for (let i = 0; i < size; i++) {
-            arr.push(Utils.randomNumber(1, MAX_ARRAY_ELEMENT));
+            arr.push(Utils.randomNumber(0, 359)); // Possible HUE values (HSL)
         }
         this.setState({ array: arr }); 
 
@@ -222,13 +226,25 @@ export class VerticalBarsRenderer extends Component{
     // Render method
     render() {   
         return (  
-            <div className="vbars-render-zone">
+            <div className="colors-render-zone">
                 {
-                    this.state.array.map((number, index) => 
-                        <div key={index} ref={x=>this.bars[index] = x} style={{
-                            height: number,
-                            marginTop: Math.max(...this.state.array) - number
-                        }} className="vertical-bar"></div>
+                    this.state.array.map((hue, index) => 
+                        <div key={index} 
+                            ref={x=>this.bars[index] = x} 
+                            className="color-bar"
+                            style={{
+                                height: COLOR_BAR_HEIGHT + "px",
+                                backgroundColor: "hsl(" + hue + ", " + SATURATION + "%, " + LIGHTNESS + "%)"
+                            }}
+                        >
+                            <div className="color-bar-indicator"
+                                style={{
+                                    marginTop: (COLOR_BAR_HEIGHT - 10) + "px",
+                                    height: '10px',
+                                    backgroundColor: 'darkgrey'
+                                }}
+                            ></div>
+                        </div>
                     )
                 }
             </div> 

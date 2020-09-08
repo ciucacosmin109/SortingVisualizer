@@ -33,7 +33,7 @@
 }
 
  
-@media only screen and (min-width: 400px) and (max-width: 484px) { 
+@media only screen and (min-width: 400px) and (max-width: 500px) { 
     .home .range-input {  
         display: flex;
         flex-flow: column;
@@ -49,14 +49,14 @@
     .home .card .card-footer .range-input {
         margin-top: 10px;
     }
-}   
-
+}    
 .home .form-check { 
     display: flex; 
     align-items: center;
 } 
  
  
+
 .home .card .render-zone {
     display: flex;
     flex-flow: row;

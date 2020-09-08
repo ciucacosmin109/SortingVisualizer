@@ -1,0 +1,9 @@
+.colors-render-zone {
+    display: flex;
+    flex-flow: row;
+} 
+.colors-render-zone .color-bar{
+    flex: 1; 
+    margin:0; 
+} 
+
