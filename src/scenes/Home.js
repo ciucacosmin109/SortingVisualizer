@@ -16,7 +16,7 @@ import { QuickSort } from '../algorithms/QuickSort.js';
 import { HeapSort } from '../algorithms/HeapSort';
 import { ShellSort } from '../algorithms/ShellSort';
   
-const ALLOWED_DELAYS = [1000, 300, 100, 40, 15, 1];
+const ALLOWED_DELAYS = [1000, 300, 100, 40, 15, 2, 1];
  
 export class Home extends Component {
     static displayName = Home.name;
@@ -32,7 +32,7 @@ export class Home extends Component {
             arraySize : 100, // Used by the array size slider 10-500
 
             playing: false, // Used by the Play/Pause/Stop buttons
-            delay: 1, // Used by the speed slider = [1,100]
+            delay: 2, // Used by the speed slider = [1,100]
             soundEnabled: true // Used by the checkbox 
         };
  
