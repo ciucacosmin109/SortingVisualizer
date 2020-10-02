@@ -1,13 +1,16 @@
-﻿import { SortResult } from './SortResult.js';
+﻿import React from 'react';
+import { SortResult } from './factory/SortResult.js';
 
 export class MergeSortIterative {
+    static displayName = "Merge sort (Iterative)";
+    
     static sort(arrayToSort, modifyTheOriginal) {
         let array = modifyTheOriginal ? arrayToSort : [...arrayToSort];
         let result = new SortResult();
 
         MergeSortIterative.mergeSortIter(array, result); 
 
-        result.addReplaceAnimation(0, array.length - 1, array); 
+        //result.addReplaceAnimation(0, array.length - 1, array); 
         result.sortedArray = array;
         return result;
     } 
@@ -55,4 +58,22 @@ export class MergeSortIterative {
         }
     } 
 
+    static getDescription(){
+        return(<div>
+            In computer science, <b>merge sort</b> (also commonly spelled mergesort) 
+            is an efficient, general-purpose, comparison-based sorting algorithm. 
+            Most implementations produce a stable sort, which means that the 
+            order of equal elements is the same in the input and output. <br/><br/>
+            
+            <b>Merge sort</b> is a divide and conquer algorithm that was invented by 
+            <b> John von Neumann</b> in <b>1945</b>. A detailed description and analysis of 
+            bottom-up mergesort appeared in a report by Goldstine and 
+            von Neumann as early as 1948<br/><br/>
+
+            More info on <a href="https://en.wikipedia.org/wiki/Merge_sort" target="_blank" rel="noopener noreferrer">Wikipedia</a><br/>
+        </div>); 
+    } 
+    static getComplexity(){
+        return "O(n*log(n))"; 
+    }
 }

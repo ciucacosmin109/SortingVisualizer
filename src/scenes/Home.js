@@ -1,21 +1,12 @@
 import React, { Component } from 'react'; 
+import './Home.css'; 
+  
 import { SoundPlayer } from '../utils/SoundPlayer';
 import { VerticalBarsRenderer } from '../renderers/VerticalBarsRenderer';
 import { ColorsRenderer } from '../renderers/ColorsRenderer';
+import { AlgorithmFactory } from '../algorithms/factory/AlgorithmFactory';
+import { QuickSort } from '../algorithms/QuickSort'; 
 
-import './Home.css';
- 
-//import { SortResult } from '../algorithms/SortResult.js'; 
-import { BubbleSort } from '../algorithms/BubbleSort.js';
-import { InsertionSort } from '../algorithms/InsertionSort.js';
-import { SelectionSort } from '../algorithms/SelectionSort.js';
-import { MergeSortRecursive } from '../algorithms/MergeSortRecursive.js';
-import { MergeSortIterative } from '../algorithms/MergeSortIterative.js';
-import { CocktailSort } from '../algorithms/CocktailSort.js';
-import { QuickSort } from '../algorithms/QuickSort.js';
-import { HeapSort } from '../algorithms/HeapSort';
-import { ShellSort } from '../algorithms/ShellSort';
-  
 const ALLOWED_DELAYS = [1000, 300, 100, 40, 15, 2, 1];
  
 export class Home extends Component {
@@ -27,7 +18,7 @@ export class Home extends Component {
         this.state = { 
             array: [], // The current array  
  
-            algorithmId: 7, // Used by the algo combo-box
+            algorithmId: QuickSort.displayName, // Used by the algo combo-box
             rendererId: 1, // Used by the renderer combo-box
             arraySize : 100, // Used by the array size slider 10-500
 
@@ -43,38 +34,7 @@ export class Home extends Component {
     componentWillUnmount() { this.stopSortAnimation(); }  
     
     getSortResult(modifyTheOriginal = false) { // returns a SortResult object based on selected algorithm
-        let sortResult;
-        switch (this.state.algorithmId) {
-            case 1:
-                sortResult = BubbleSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 2:
-                sortResult = InsertionSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 3:
-                sortResult = SelectionSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 4:
-                sortResult = MergeSortRecursive.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 5:
-                sortResult = MergeSortIterative.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 6:
-                sortResult = QuickSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 7:
-                sortResult = HeapSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 8:
-                sortResult = ShellSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            case 9:
-                sortResult = CocktailSort.sort(this.state.array, modifyTheOriginal);
-                break;
-            default:
-                break;
-        }
+        let sortResult = AlgorithmFactory.getAlgorithm(this.state.algorithmId).sort(this.state.array, modifyTheOriginal); 
         console.log(sortResult); 
 
         return sortResult;
@@ -125,8 +85,8 @@ export class Home extends Component {
 
     // Control handlers
     onAlgorithmChange = (event) => {
-        let newId = parseInt(event.target.value);
-        this.setState({ algorithmId: newId });
+        //let newId = parseInt(event.target.value);
+        this.setState({ algorithmId: event.target.value });
     }
     onRendererChange = (event) => {
         if(this.renderer != null)
@@ -197,16 +157,10 @@ export class Home extends Component {
                             <label htmlFor="selectAlgoDropDown"><h6>Algorithm</h6></label>
                             <select className="btn btn-sm combo-box" id="selectAlgoDropDown"
                                 onChange={this.onAlgorithmChange} value={this.state.algorithmId}>
-                                <option value={1}>Bubble sort</option>
-                                <option value={2}>Insertion sort</option>
-                                <option value={3}>Selection sort</option>
-                                <option value={4}>Merge sort (recursive)</option>
-                                <option value={5}>Merge sort (iterative)</option>
-                                <option value={6}>Quick sort</option>
-                                <option value={7}>Heap sort</option>
-                                <option value={8}>Shell sort</option>
-                                <option value={-1} disabled></option>
-                                <option value={9}>Cocktail sort</option>
+                                
+                                {AlgorithmFactory.getAllAlgorithmNames().map(x=>
+                                    <option key={x} value={x}>{x}</option>
+                                )} 
                             </select>
 
                         </div>
@@ -252,6 +206,20 @@ export class Home extends Component {
 
                     <div className="card-body render-zone"> 
                         {this.renderView()}
+                    </div>
+                </div>
+                
+                <div className="card">
+                    <div className="card-header">
+                        <h6>About {this.state.algorithmId}</h6> 
+
+                        <div className="div-right">
+                            <b>Time complexity:</b>{AlgorithmFactory.getAlgorithm(this.state.algorithmId).getComplexity()}
+                        </div>
+                    </div>
+ 
+                    <div className="card-body render-zone"> 
+                        {AlgorithmFactory.getAlgorithm(this.state.algorithmId).getDescription()}
                     </div>
                 </div>
             </div>

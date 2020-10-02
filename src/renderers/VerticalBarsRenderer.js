@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Utils } from '../utils/Utils'
-import { SortResult } from '../algorithms/SortResult.js'; 
+import { SortResult } from '../algorithms/factory/SortResult.js'; 
 
 import './VerticalBarsRenderer.css'
 
