@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { SortResult } from './factory/SortResult.js';
+import TimeComplexity from './factory/TimeComplexity';
 
 export class InsertionSort {
     static displayName = "Insertion sort";
@@ -56,8 +57,8 @@ export class InsertionSort {
 
             More info on <a href="https://en.wikipedia.org/wiki/Insertion_sort" target="_blank" rel="noopener noreferrer">Wikipedia</a><br/>
         </div>); 
-    } 
-    static getComplexity(){
-        return "O(n^2)"; 
-    }
+    }  
+    static getTimeComplexity(){
+        return new TimeComplexity("O(n)", "O(n^2)", "O(n^2)"); 
+    }  
 }

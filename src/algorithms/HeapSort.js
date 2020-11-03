@@ -1,5 +1,6 @@
 import React from 'react';
 import { SortResult } from './factory/SortResult.js';
+import TimeComplexity from './factory/TimeComplexity';
 
 export class HeapSort {
     static displayName = "Heap sort";
@@ -77,9 +78,9 @@ export class HeapSort {
 
             More info on <a href="https://en.wikipedia.org/wiki/Heapsort" target="_blank" rel="noopener noreferrer">Wikipedia</a><br/>
         </div>); 
+    }  
+    static getTimeComplexity(){
+        return new TimeComplexity("O(n*log(n))", "O(n*log(n))", "O(n*log(n))"); 
     } 
-    static getComplexity(){
-        return "O(n*log(n))"; 
-    }
 } 
 // 1 0 3 6 3 7 9

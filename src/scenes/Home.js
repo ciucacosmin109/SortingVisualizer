@@ -149,6 +149,7 @@ export class Home extends Component {
 
     // Render method
     render() {  
+        let timeComplexity = AlgorithmFactory.getAlgorithm(this.state.algorithmId).getTimeComplexity();
         return (
             <div className="home">
                 <div className="card">
@@ -211,14 +212,36 @@ export class Home extends Component {
                 
                 <div className="card">
                     <div className="card-header">
-                        <h6>About {this.state.algorithmId}</h6> 
-
-                        <div className="div-right">
-                            <b>Time complexity:</b>{AlgorithmFactory.getAlgorithm(this.state.algorithmId).getComplexity()}
-                        </div>
+                        <h6>Time complexity of {this.state.algorithmId}</h6>  
                     </div>
  
-                    <div className="card-body render-zone"> 
+                    <div className="card-body">  
+                        <table className="time-complexity-table">
+                            <thead>
+                                <tr>
+                                    <td>Best case</td>
+                                    <td>Average case</td>
+                                    <td>Worst case</td>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr> 
+                                    <td>{timeComplexity.best}</td>
+                                    <td>{timeComplexity.average}</td>
+                                    <td>{timeComplexity.worst}</td>
+                                </tr>
+                            </tbody>
+                        </table> 
+                    </div>
+                </div>
+                
+                <div className="card">
+                    <div className="card-header">
+                        <h6>About {this.state.algorithmId}</h6>  
+                    </div>
+ 
+                    <div className="card-body"> 
                         {AlgorithmFactory.getAlgorithm(this.state.algorithmId).getDescription()}
                     </div>
                 </div>

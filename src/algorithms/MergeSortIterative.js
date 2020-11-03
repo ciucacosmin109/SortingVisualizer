@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { SortResult } from './factory/SortResult.js';
+import TimeComplexity from './factory/TimeComplexity';
 
 export class MergeSortIterative {
     static displayName = "Merge sort (Iterative)";
@@ -72,8 +73,8 @@ export class MergeSortIterative {
 
             More info on <a href="https://en.wikipedia.org/wiki/Merge_sort" target="_blank" rel="noopener noreferrer">Wikipedia</a><br/>
         </div>); 
+    }   
+    static getTimeComplexity(){
+        return new TimeComplexity("O(n*log(n))", "O(n*log(n))", "O(n*log(n))"); 
     } 
-    static getComplexity(){
-        return "O(n*log(n))"; 
-    }
 }

@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { SortResult } from './factory/SortResult.js';
+import TimeComplexity from './factory/TimeComplexity';
 
 export class SelectionSort {
     static displayName = "Selection sort";
@@ -57,7 +58,7 @@ export class SelectionSort {
             More info on <a href="https://en.wikipedia.org/wiki/Selection_sort" target="_blank" rel="noopener noreferrer">Wikipedia</a><br/>
         </div>); 
     } 
-    static getComplexity(){
-        return "O(n^2)"; 
+    static getTimeComplexity(){
+        return new TimeComplexity("O(n^2)", "O(n^2)", "O(n^2)"); 
     }
 }

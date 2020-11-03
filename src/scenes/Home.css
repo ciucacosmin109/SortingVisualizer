@@ -67,3 +67,19 @@
     margin:0; 
 } 
 
+
+
+.time-complexity-table{
+    width: 100%; 
+}
+.time-complexity-table thead td{
+    font-weight: bold;
+}
+.time-complexity-table tr td:nth-child(2){
+    text-align: center;
+    border-left: 1px solid #d8d8d8;
+    border-right: 1px solid #d8d8d8;
+}
+.time-complexity-table tr td:nth-child(3){
+    text-align: right;
+}

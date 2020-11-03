@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { SortResult } from './factory/SortResult.js';
+import TimeComplexity from './factory/TimeComplexity';
 
 export class QuickSort {
     static displayName = "Quick sort";
@@ -77,9 +78,9 @@ export class QuickSort {
 
             More info on <a href="https://en.wikipedia.org/wiki/Quicksort" target="_blank" rel="noopener noreferrer">Wikipedia</a><br/>
         </div>); 
+    }  
+    static getTimeComplexity(){
+        return new TimeComplexity("O(n*log(n))", "O(n*log(n))", "O(n^2)"); 
     } 
-    static getComplexity(){
-        return "O(n*log(n))"; 
-    }
 } 
 // 6 7 9 8 9 
